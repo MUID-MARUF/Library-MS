@@ -1,0 +1,64 @@
+===========================================================================
+    LIBRARY MANAGEMENT SYSTEM - COMPLETE SETUP GUIDE (Win/Mac)
+===========================================================================
+This guide is for freshers to run the project from zero on Windows 11 or Mac.
+
+STEP 1: DATABASE SETUP (XAMPP)
+---------------------------------------------------------------------------
+1. Download & Install XAMPP:
+   - Go to: https://www.apachefriends.org/download.html
+   - Download the version for your OS (Windows or Mac).
+2. Start the Services:
+   - Open XAMPP Control Panel.
+   - Click "Start" for both Apache and MySQL.
+3. Create the Database:
+   - Open your browser and go to: http://localhost/phpmyadmin/
+   - Click "New" on the left sidebar.
+   - Database name: library_db
+   - Click "Create".
+4. Import the SQL Script:
+   - Click on your new "library_db" on the left.
+   - Click the "SQL" tab at the top.
+   - Open "Library Management System.txt" from the project folder.
+   - Copy ALL the text inside and paste it into the SQL box in phpMyAdmin.
+   - Click "Go" at the bottom right.
+
+STEP 2: PYTHON & VIRTUAL ENVIRONMENT SETUP
+---------------------------------------------------------------------------
+1. Open your Terminal (Mac) or PowerShell (Windows).
+2. Navigate to the project folder:
+   - Windows: cd C:\Path\To\TaajProject
+   - Mac: cd /Users/YourName/Desktop/TaajProject
+3. Create a clean Virtual Environment:
+   - Command: python -m venv venv
+4. Activate the environment:
+   - Windows: venv\Scripts\activate
+   - Mac: source venv/bin/activate
+   * (You should see "(venv)" appear at the start of your terminal line)
+
+STEP 3: INSTALL DEPENDENCIES
+---------------------------------------------------------------------------
+Once your environment is active (venv), run this command:
+   pip install django mysql-connector-python
+
+STEP 4: RUN THE PROJECT
+---------------------------------------------------------------------------
+1. Prepare the Django system:
+   python manage.py migrate
+2. Start the server:
+   python manage.py runserver 8001
+3. Access the website:
+   - Open your browser and go to: http://127.0.0.1:8001/
+
+===========================================================================
+    PROJECT FEATURES & TIPS
+===========================================================================
+- Sidebar: Use the left menu to switch between Books, Members, Staff, etc.
+- Details: Click the "Eye" icon in any table to see deep database info.
+- Dark Mode: Click the Moon icon in the top header to toggle Dark Mode.
+- Team: See the "The Falcons" credits at the bottom of the page.
+
+TROUBLESHOOTING:
+- "Unknown database": Make sure you created 'library_db' in phpMyAdmin.
+- "Port in use": If 8001 doesn't work, try python manage.py runserver 8002.
+===========================================================================

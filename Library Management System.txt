@@ -1,0 +1,325 @@
+CREATE TABLE IF NOT EXISTS Author (
+    AuthorID INT PRIMARY KEY,
+    AuthorName VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS Publisher (
+    PublisherID INT PRIMARY KEY,
+    PublisherName VARCHAR(100),
+    Address VARCHAR(200)
+);
+
+CREATE TABLE IF NOT EXISTS Member (
+    MemberID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Email VARCHAR(100),
+    Phone VARCHAR(20),
+    Address VARCHAR(200)
+);
+
+CREATE TABLE IF NOT EXISTS Staff (
+    StaffID INT PRIMARY KEY,
+    StaffName VARCHAR(100),
+    Phone VARCHAR(20),
+    Role VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS Category (
+    CategoryID INT PRIMARY KEY,
+    CategoryName VARCHAR(100),
+    Shelf_No VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS Book (
+    BookID INT PRIMARY KEY,
+    Title VARCHAR(100),
+    AvailableCopies INT DEFAULT 20
+);
+
+CREATE TABLE IF NOT EXISTS Issue (
+    IssueID INT PRIMARY KEY,
+    IssueDate DATE,
+    ReturnDate DATE,
+    FineAmount DECIMAL(10,2),
+    FineStatus VARCHAR(20),
+    StaffID INT,
+    MemberID INT,
+    FOREIGN KEY (StaffID) REFERENCES Staff(StaffID) ON UPDATE CASCADE,
+    FOREIGN KEY (MemberID) REFERENCES Member(MemberID) ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Rating (
+    RatingID INT PRIMARY KEY,
+    RatingValue INT,
+    Review VARCHAR(200),
+    BookID INT,
+    MemberID INT,
+    FOREIGN KEY (BookID) REFERENCES Book(BookID) ON DELETE CASCADE,
+    FOREIGN KEY (MemberID) REFERENCES Member(MemberID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Writes (
+    BookID INT,
+    AuthorID INT,
+    PRIMARY KEY (BookID, AuthorID),
+    FOREIGN KEY (BookID) REFERENCES Book(BookID) ON DELETE CASCADE,
+    FOREIGN KEY (AuthorID) REFERENCES Author(AuthorID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Publish (
+    BookID INT,
+    PublisherID INT,
+    PRIMARY KEY (BookID, PublisherID),
+    FOREIGN KEY (BookID) REFERENCES Book(BookID) ON DELETE CASCADE,
+    FOREIGN KEY (PublisherID) REFERENCES Publisher(PublisherID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Contain (
+    BookID INT,
+    CategoryID INT,
+    PRIMARY KEY (BookID, CategoryID),
+    FOREIGN KEY (BookID) REFERENCES Book(BookID) ON DELETE CASCADE,
+    FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Handles (
+    IssueID INT,
+    StaffID INT,
+    PRIMARY KEY (IssueID, StaffID),
+    FOREIGN KEY (IssueID) REFERENCES Issue(IssueID) ON DELETE CASCADE,
+    FOREIGN KEY (StaffID) REFERENCES Staff(StaffID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS HasBook (
+    IssueID INT,
+    BookID INT,
+    PRIMARY KEY (IssueID, BookID),
+    FOREIGN KEY (IssueID) REFERENCES Issue(IssueID) ON DELETE CASCADE,
+    FOREIGN KEY (BookID) REFERENCES Book(BookID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Generate (
+    IssueID INT,
+    RatingID INT,
+    PRIMARY KEY (IssueID, RatingID),
+    FOREIGN KEY (IssueID) REFERENCES Issue(IssueID) ON DELETE CASCADE,
+    FOREIGN KEY (RatingID) REFERENCES Rating(RatingID) ON DELETE CASCADE
+);
+
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_author_insert $$
+CREATE TRIGGER trg_author_insert BEFORE INSERT ON Author FOR EACH ROW
+BEGIN
+    IF NEW.AuthorName IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Author name required'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_publisher_insert $$
+CREATE TRIGGER trg_publisher_insert BEFORE INSERT ON Publisher FOR EACH ROW
+BEGIN
+    IF NEW.PublisherName IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Publisher name required'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_member_insert $$
+CREATE TRIGGER trg_member_insert BEFORE INSERT ON Member FOR EACH ROW
+BEGIN
+    IF NEW.Name IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Member name required'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_staff_insert $$
+CREATE TRIGGER trg_staff_insert BEFORE INSERT ON Staff FOR EACH ROW
+BEGIN
+    IF NEW.StaffName IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Staff name required'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_category_insert $$
+CREATE TRIGGER trg_category_insert BEFORE INSERT ON Category FOR EACH ROW
+BEGIN
+    IF NEW.CategoryName IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Category required'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_book_insert $$
+CREATE TRIGGER trg_book_insert BEFORE INSERT ON Book FOR EACH ROW
+BEGIN
+    IF NEW.Title IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Book title required'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_issue_insert $$
+CREATE TRIGGER trg_issue_insert BEFORE INSERT ON Issue FOR EACH ROW
+BEGIN
+    IF NEW.IssueDate IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Issue date required'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_rating_insert $$
+CREATE TRIGGER trg_rating_insert BEFORE INSERT ON Rating FOR EACH ROW
+BEGIN
+    IF NEW.RatingValue < 1 OR NEW.RatingValue > 5 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Invalid rating'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_writes_insert $$
+CREATE TRIGGER trg_writes_insert BEFORE INSERT ON Writes FOR EACH ROW
+BEGIN
+    IF NEW.BookID IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Writes error'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_publish_insert $$
+CREATE TRIGGER trg_publish_insert BEFORE INSERT ON Publish FOR EACH ROW
+BEGIN
+    IF NEW.BookID IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Publish error'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_contain_insert $$
+CREATE TRIGGER trg_contain_insert BEFORE INSERT ON Contain FOR EACH ROW
+BEGIN
+    IF NEW.CategoryID IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Contain error'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_handles_insert $$
+CREATE TRIGGER trg_handles_insert BEFORE INSERT ON Handles FOR EACH ROW
+BEGIN
+    IF NEW.StaffID IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Handle error'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_hasbook_insert $$
+CREATE TRIGGER trg_hasbook_insert BEFORE INSERT ON HasBook FOR EACH ROW
+BEGIN
+    IF NEW.BookID IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='HasBook error'; END IF;
+END $$
+
+DROP TRIGGER IF EXISTS trg_generate_insert $$
+CREATE TRIGGER trg_generate_insert BEFORE INSERT ON Generate FOR EACH ROW
+BEGIN
+    IF NEW.RatingID IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Generate error'; END IF;
+END $$
+
+DELIMITER ;
+
+INSERT IGNORE INTO Author VALUES
+(1,'Humayun Ahmed'),(2,'Rabindranath Tagore'),(3,'Kazi Nazrul Islam'),(4,'Sarat Chandra Chattopadhyay'),(5,'Zahir Raihan'),
+(6,'Ahmed Sofa'),(7,'Syed Shamsul Haq'),(8,'Selina Hossain'),(9,'Muhammed Zafar Iqbal'),(10,'Anisul Hoque'),
+(11,'Taslima Nasrin'),(12,'Shamsur Rahman'),(13,'Jibanananda Das'),(14,'Manik Bandyopadhyay'),(15,'Bibhutibhushan Bandyopadhyay'),
+(16,'Tarashankar Bandyopadhyay'),(17,'Sunil Gangopadhyay'),(18,'Shirshendu Mukhopadhyay'),(19,'Humayun Azad'),(20,'Al Mahmud');
+
+INSERT IGNORE INTO Publisher VALUES
+(1,'Anyaprokash','Dhaka'),(2,'Prothoma Prokashan','Dhaka'),(3,'Anwesha Prokashan','Dhaka'),(4,'Somoy Prokashan','Dhaka'),(5,'Maula Brothers','Dhaka'),
+(6,'Kakoli Prokashani','Dhaka'),(7,'Bibhash','Dhaka'),(8,'Kotha Prokash','Dhaka'),(9,'Tamralipi','Dhaka'),(10,'Oitijjhya','Dhaka'),
+(11,'Bappi Prokashani','Dhaka'),(12,'Agamee Prakashani','Dhaka'),(13,'Nowroze Kitabistan','Dhaka'),(14,'Student Ways','Dhaka'),(15,'Muktadhara','Dhaka'),
+(16,'Onindya Prokash','Dhaka'),(17,'Panjeree Publications','Dhaka'),(18,'Ananya','Dhaka'),(19,'Jagriti Prokashani','Dhaka'),(20,'Sandesh','Dhaka');
+
+INSERT IGNORE INTO Member VALUES
+(1,'Abdur Rahman','rahman@mail','01711','Dhaka'),(2,'Fatema Begum','fatema@mail','01811','Chittagong'),
+(3,'Tamim Iqbal','tamim@mail','01911','Sylhet'),(4,'Nasrin Akter','nasrin@mail','01611','Rajshahi'),
+(5,'Kamrul Hasan','kamrul@mail','01511','Khulna'),(6,'Arif Ahmed','arif@mail','01311','Barisal'),
+(7,'Sumaiya Islam','sumaiya@mail','01411','Rangpur'),(8,'Jasim Uddin','jasim@mail','01722','Comilla'),
+(9,'Rashed Khan','rashed@mail','01822','Bogra'),(10,'Sadia Afrin','sadia@mail','01922','Mymensingh'),
+(11,'Tanvir Ahmed','tanvir@mail','01622','Dhaka'),(12,'Maliha Haq','maliha@mail','01522','Dhaka'),
+(13,'Rakib Hossain','rakib@mail','01322','Gazipur'),(14,'Nusrat Jahan','nusrat@mail','01422','Narayanganj'),
+(15,'Sakib Al Hasan','sakib@mail','01733','Magura'),(16,'Farzana Yasmin','farzana@mail','01833','Dhaka'),
+(17,'Imran Hossain','imran@mail','01933','Dhaka'),(18,'Roksana Parveen','roksana@mail','01633','Savar'),
+(19,'Hasibur Rahman','hasib@mail','01533','Dhaka'),(20,'Farhana Mili','farhana@mail','01333','Dhaka');
+
+INSERT IGNORE INTO Staff VALUES
+(1,'Karim Mia','011','Librarian'),(2,'Rahima Khatun','012','Asst Librarian'),(3,'Shafiqul Islam','013','Admin'),
+(4,'Joynal Abedin','014','Clerk'),(5,'Ayesha Siddiqua','015','Assistant'),(6,'Badrul Alam','016','Admin'),
+(7,'Morshed Alam','017','IT Support'),(8,'Parveen Akter','018','Assistant'),(9,'Sumon Debnath','019','Admin'),
+(10,'Abul Kashem','020','Guard'),(11,'Salam Sheikh','021','Assistant'),(12,'Rafiq Ahmed','022','Assistant'),
+(13,'Zubayer Ahmed','023','Admin'),(14,'Sohel Rana','024','Clerk'),(15,'Nazmul Haque','025','Assistant'),
+(16,'Tania Sultana','026','Assistant'),(17,'Ferdous Wahid','027','Admin'),(18,'Asadullah','028','Clerk'),
+(19,'Khadija Akter','029','Assistant'),(20,'Mansur Ali','030','Admin');
+
+INSERT IGNORE INTO Category VALUES
+(1,'Novel','S1'),(2,'Poetry','S2'),(3,'Short Story','S3'),(4,'History','S4'),(5,'Science Fiction','S5'),
+(6,'Essay','S6'),(7,'Travelogue','S7'),(8,'Biography','S8'),(9,'Religious','S9'),(10,'Children Literature','S10'),
+(11,'Detective','S11'),(12,'Drama','S12'),(13,'Cooking','S13'),(14,'Computer','S14'),(15,'Mathematics','S15'),
+(16,'Horror','S16'),(17,'Translation','S17'),(18,'Liberation War','S18'),(19,'Politics','S19'),(20,'Health','S20');
+
+INSERT IGNORE INTO Book VALUES
+(1,'Nondito Noroke',20),(2,'Gitanjali',20),(3,'Agnibeena',20),(4,'Devdas',20),(5,'Jibon O Rajnoitik Rekha',20),
+(6,'Padma Nadir Majhi',20),(7,'Aranyak',20),(8,'Lalsalu',20),(9,'Chilekothar Sepai',20),(10,'Maa',20),
+(11,'Parthibo',20),(12,'Durbin',20),(13,'Konkal',20),(14,'Shonkhonil Karagar',20),(15,'Hajar Bochor Dhore',20),
+(16,'Chander Pahar',20),(17,'Payer Awaj Pawa Jay',20),(18,'Sangsaptak',20),(19,'Cracker Colonel',20),(20,'Meghnad Badh Kabya',20);
+
+INSERT IGNORE INTO Writes VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
+(11,11),(12,12),(13,13),(14,14),(15,15),(16,16),(17,17),(18,18),(19,19),(20,20);
+
+INSERT IGNORE INTO Publish VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
+(11,11),(12,12),(13,13),(14,14),(15,15),(16,16),(17,17),(18,18),(19,19),(20,20);
+
+INSERT IGNORE INTO Contain VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
+(11,11),(12,12),(13,13),(14,14),(15,15),(16,16),(17,17),(18,18),(19,19),(20,20);
+
+INSERT IGNORE INTO Issue VALUES
+(1,'2026-01-01','2026-01-10',0,'No',1,1),
+(2,'2026-01-02','2026-01-11',0,'No',2,2),
+(3,'2026-01-03','2026-01-12',0,'No',3,3),
+(4,'2026-01-04','2026-01-13',0,'No',4,4),
+(5,'2026-01-05','2026-01-14',0,'No',5,5),
+(6,'2026-01-06','2026-01-15',0,'No',6,6),
+(7,'2026-01-07','2026-01-16',0,'No',7,7),
+(8,'2026-01-08','2026-01-17',0,'No',8,8),
+(9,'2026-01-09','2026-01-18',0,'No',9,9),
+(10,'2026-01-10','2026-01-19',0,'No',10,10),
+(11,'2026-01-11','2026-01-20',0,'No',11,11),
+(12,'2026-01-12','2026-01-21',0,'No',12,12),
+(13,'2026-01-13','2026-01-22',0,'No',13,13),
+(14,'2026-01-14','2026-01-23',0,'No',14,14),
+(15,'2026-01-15','2026-01-24',0,'No',15,15),
+(16,'2026-01-16','2026-01-25',0,'No',16,16),
+(17,'2026-01-17','2026-01-26',0,'No',17,17),
+(18,'2026-01-18','2026-01-27',0,'No',18,18),
+(19,'2026-01-19','2026-01-28',0,'No',19,19),
+(20,'2026-01-20','2026-01-29',0,'No',20,20);
+
+INSERT IGNORE INTO HasBook VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
+(11,11),(12,12),(13,13),(14,14),(15,15),(16,16),(17,17),(18,18),(19,19),(20,20);
+
+INSERT IGNORE INTO Handles VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
+(11,11),(12,12),(13,13),(14,14),(15,15),(16,16),(17,17),(18,18),(19,19),(20,20);
+
+INSERT IGNORE INTO Rating VALUES
+(1,5,'Excellent',1,1),(2,4,'Great read',2,2),(3,3,'Average',3,3),(4,5,'Must read',4,4),(5,4,'Very good',5,5),
+(6,5,'Classic',6,6),(7,4,'Good',7,7),(8,3,'Nice',8,8),(9,5,'Loved it',9,9),(10,4,'Well written',10,10),
+(11,5,'Brilliant',11,11),(12,4,'Interesting',12,12),(13,3,'Good',13,13),(14,5,'Superb',14,14),
+(15,4,'Nice',15,15),(16,5,'Adventure',16,16),(17,4,'Touching',17,17),(18,3,'Okay',18,18),
+(19,5,'Powerful',19,19),(20,4,'Classic',20,20);
+
+INSERT IGNORE INTO Generate VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
+(11,11),(12,12),(13,13),(14,14),(15,15),(16,16),(17,17),(18,18),(19,19),(20,20);
+
+CREATE OR REPLACE VIEW AuthorView AS SELECT * FROM Author;
+CREATE OR REPLACE VIEW PublisherView AS SELECT * FROM Publisher;
+CREATE OR REPLACE VIEW MemberView AS SELECT * FROM Member;
+CREATE OR REPLACE VIEW StaffView AS SELECT * FROM Staff;
+CREATE OR REPLACE VIEW CategoryView AS SELECT * FROM Category;
+CREATE OR REPLACE VIEW BookView AS SELECT * FROM Book;
+CREATE OR REPLACE VIEW IssueView AS SELECT * FROM Issue;
+CREATE OR REPLACE VIEW RatingView AS SELECT * FROM Rating;
+CREATE OR REPLACE VIEW WritesView AS SELECT * FROM Writes;
+CREATE OR REPLACE VIEW PublishView AS SELECT * FROM Publish;
+CREATE OR REPLACE VIEW ContainView AS SELECT * FROM Contain;
+CREATE OR REPLACE VIEW HandlesView AS SELECT * FROM Handles;
+CREATE OR REPLACE VIEW HasBookView AS SELECT * FROM HasBook;
+CREATE OR REPLACE VIEW GenerateView AS SELECT * FROM Generate;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS GetAuthor $$ CREATE PROCEDURE GetAuthor() BEGIN SELECT * FROM Author; END $$
+DROP PROCEDURE IF EXISTS GetPublisher $$ CREATE PROCEDURE GetPublisher() BEGIN SELECT * FROM Publisher; END $$
+DROP PROCEDURE IF EXISTS GetMember $$ CREATE PROCEDURE GetMember() BEGIN SELECT * FROM Member; END $$
+DROP PROCEDURE IF EXISTS GetStaff $$ CREATE PROCEDURE GetStaff() BEGIN SELECT * FROM Staff; END $$
+DROP PROCEDURE IF EXISTS GetCategory $$ CREATE PROCEDURE GetCategory() BEGIN SELECT * FROM Category; END $$
+DROP PROCEDURE IF EXISTS GetBook $$ CREATE PROCEDURE GetBook() BEGIN SELECT * FROM Book; END $$
+DROP PROCEDURE IF EXISTS GetIssue $$ CREATE PROCEDURE GetIssue() BEGIN SELECT * FROM Issue; END $$
+DROP PROCEDURE IF EXISTS GetRating $$ CREATE PROCEDURE GetRating() BEGIN SELECT * FROM Rating; END $$
+DROP PROCEDURE IF EXISTS GetWrites $$ CREATE PROCEDURE GetWrites() BEGIN SELECT * FROM Writes; END $$
+DROP PROCEDURE IF EXISTS GetPublish $$ CREATE PROCEDURE GetPublish() BEGIN SELECT * FROM Publish; END $$
+DROP PROCEDURE IF EXISTS GetContain $$ CREATE PROCEDURE GetContain() BEGIN SELECT * FROM Contain; END $$
+DROP PROCEDURE IF EXISTS GetHandles $$ CREATE PROCEDURE GetHandles() BEGIN SELECT * FROM Handles; END $$
+DROP PROCEDURE IF EXISTS GetHasBook $$ CREATE PROCEDURE GetHasBook() BEGIN SELECT * FROM HasBook; END $$
+DROP PROCEDURE IF EXISTS GetGenerate $$ CREATE PROCEDURE GetGenerate() BEGIN SELECT * FROM Generate; END $$
+DELIMITER ;

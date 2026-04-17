@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-book-reader"></i>
+            <div class="logo-text">
+                <span>LibraryMS</span>
+                <small class="author-credit">by The Falcons</small>
+            </div>
+        </div>
+        <nav>
+            <a href="#" class="nav-item active" data-target="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="#" class="nav-item" data-target="books">
+                <i class="fas fa-book"></i> Books
+            </a>
+            <a href="#" class="nav-item" data-target="members">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="#" class="nav-item" data-target="issues">
+                <i class="fas fa-clipboard-list"></i> Issues
+            </a>
+            <a href="#" class="nav-item" data-target="staff">
+                <i class="fas fa-user-tie"></i> Staff
+            </a>
+            <a href="#" class="nav-item" data-target="ratings">
+                <i class="fas fa-star"></i> Ratings
+            </a>
+
+            
+        </nav>
+    </div>
+
+    <main class="content">
+        <header>
+            <div class="header-left">
+                <button id="dark-mode-toggle" class="btn btn-icon">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <div class="user-profile">
+                <span>Admin User</span>
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Profile">
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page-section active">
+            <h1 class="page-title">Dashboard Overview</h1>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon books"><i class="fas fa-book"></i></div>
+                    <div class="stat-info"><h3>Total Books</h3><p id="total-books-count">--</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon members"><i class="fas fa-users"></i></div>
+                    <div class="stat-info"><h3>Active Members</h3><p id="total-members-count">--</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon issues"><i class="fas fa-exchange-alt"></i></div>
+                    <div class="stat-info"><h3>Books Issued</h3><p id="total-issues-count">--</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rating"><i class="fas fa-star"></i></div>
+                    <div class="stat-info"><h3>Avg Rating</h3><p id="avg-rating-value">--</p></div>
+                </div>
+            </div>
+
+            <div class="recent-activity card">
+                <div class="card-header"><h2>Recent Issues</h2></div>
+                <div class="table-container">
+                    <table id="recent-issues-table">
+                        <thead><tr><th>Issue ID</th><th>Member</th><th>Issue Date</th><th>Return Date</th><th>Status</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- BOOKS -->
+        <section id="books" class="page-section">
+            <div class="section-header">
+                <h1 class="page-title">Books Inventory</h1>
+                <button class="btn btn-primary" onclick="showModal('book-modal')"><i class="fas fa-plus"></i> Add New Book</button>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table id="all-books-table">
+                        <thead><tr><th>Book ID</th><th>Title</th><th>Author</th><th>Available Copies</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- MEMBERS -->
+        <section id="members" class="page-section">
+             <div class="section-header">
+                <h1 class="page-title">Library Members</h1>
+                <button class="btn btn-primary" onclick="showModal('member-modal')"><i class="fas fa-user-plus"></i> Add Member</button>
+            </div>
+             <div class="card">
+                <div class="table-container">
+                    <table id="all-members-table">
+                        <thead><tr><th>Member ID</th><th>Name</th><th>Email</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ISSUES -->
+        <section id="issues" class="page-section">
+            <div class="section-header">
+                <h1 class="page-title">Issue Tracking</h1>
+                <button class="btn btn-primary" onclick="showModal('issue-modal')"><i class="fas fa-plus"></i> Issue New Book</button>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table id="all-issues-table">
+                        <thead><tr><th>Issue ID</th><th>Member</th><th>Issue Date</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAFF -->
+        <section id="staff" class="page-section">
+             <div class="section-header">
+                <h1 class="page-title">Library Staff</h1>
+                <button class="btn btn-primary" onclick="showModal('staff-modal')"><i class="fas fa-user-tie"></i> Add Staff</button>
+            </div>
+             <div class="card">
+                <div class="table-container">
+                    <table id="all-staff-table">
+                        <thead><tr><th>Staff ID</th><th>Name</th><th>Role</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- RATINGS -->
+        <section id="ratings" class="page-section">
+             <div class="section-header"><h1 class="page-title">Book Reviews & Ratings</h1></div>
+             <div class="card">
+                <div class="table-container">
+                    <table id="all-ratings-table">
+                        <thead><tr><th>Book</th><th>Member</th><th>Rating</th><th>Review</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODALS -->
+        <div id="book-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header"><h2>Add New Book</h2><span class="close" onclick="hideModal('book-modal')">&times;</span></div>
+                <form id="add-book-form">
+                    <div class="form-group"><label>Book Title</label><input type="text" name="Title" required></div>
+                    <div class="form-group"><label>Author Name</label><input type="text" name="AuthorName" required></div>
+                    <div class="form-group"><label>Category</label><select name="CategoryID" id="category-dropdown" required></select></div>
+                    <div class="form-group"><label>Copies</label><input type="number" name="AvailableCopies" value="20" required></div>
+                    <button type="submit" class="btn btn-primary w-100">Add Book</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="member-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header"><h2>Register Member</h2><span class="close" onclick="hideModal('member-modal')">&times;</span></div>
+                <form id="add-member-form">
+                    <div class="form-group"><label>Full Name</label><input type="text" name="Name" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" name="Email" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="Phone"></div>
+                    <div class="form-group"><label>Address</label><input type="text" name="Address"></div>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="issue-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header"><h2>Issue Book</h2><span class="close" onclick="hideModal('issue-modal')">&times;</span></div>
+                <form id="add-issue-form">
+                    <div class="form-group"><label>Select Book</label><select name="BookID" id="book-dropdown" required></select></div>
+                    <div class="form-group"><label>Select Member</label><select name="MemberID" id="member-dropdown" required></select></div>
+                    <div class="form-group"><label>Handling Staff</label><select name="StaffID" id="staff-dropdown" required></select></div>
+                    <div class="form-group"><label>Issue Date</label><input type="date" name="IssueDate" id="issue-date-input" required></div>
+                    <div class="form-group"><label>Return Date</label><input type="date" name="ReturnDate"></div>
+                    <button type="submit" class="btn btn-primary w-100">Issue Book</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="staff-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header"><h2>Add Staff</h2><span class="close" onclick="hideModal('staff-modal')">&times;</span></div>
+                <form id="add-staff-form">
+                    <div class="form-group"><label>Full Name</label><input type="text" name="StaffName" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="Phone"></div>
+                    <div class="form-group"><label>Role</label><input type="text" name="Role"></div>
+                    <button type="submit" class="btn btn-primary w-100">Save Staff</button>
+                </form>
+            </div>
+        </div>
+<!-- Details Modal -->
+<div id="details-modal" class="modal">
+    <div class="modal-content details-modal-content">
+        <div class="modal-header"><h2 id="details-title">Details</h2><span class="close" onclick="hideModal('details-modal')">&times;</span></div>
+        <div id="details-body" class="details-body"></div>
+    </div>
+</div>
+
+<footer class="main-footer">
+    <div class="footer-content">
+        <p class="powered-by">Powered by <strong>The Falcons</strong></p>
+        <ul class="team-list">
+            <li>Ridwan Hossain Taj (592)</li>
+            <li>Motasin Shahriar (664)</li>
+            <li>Sumiya Islam Mithila (671)</li>
+            <li>Any Akter (181)</li>
+            <li>A.K.M. Tahim Ibn Tazul Pranta (977)</li>
+        </ul>
+    </div>
+</footer>
+
+</main>
+
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
