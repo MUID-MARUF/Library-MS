@@ -71,16 +71,4 @@ The system is designed with a strict separation of concerns to ensure maintainab
 ```
 
 ---
-
-## 🦅 The Falcons - Development Team
-
-This project was engineered and maintained by **The Falcons**:
-
-1. **Ridwan Hossain Taj** (592)
-2. **Motasin Shahriar** (664)
-3. **Sumiya Islam Mithila** (671)
-4. **Any Akter** (181)
-5. **A.K.M. Tahim Ibn Tazul Pranta** (977)
-
----
-*© 2026 Library Management System - Powered by The Falcons.*
+*© 2026 Library Management System - Powered by Muid Hasan Maruf
