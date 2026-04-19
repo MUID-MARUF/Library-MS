@@ -1,64 +1,76 @@
 ===========================================================================
     LIBRARY MANAGEMENT SYSTEM - COMPLETE SETUP GUIDE (Win/Mac)
 ===========================================================================
-This guide is for freshers to run the project from zero on Windows 11 or Mac.
+This guide is for a FRESH setup on a Windows 11 or Mac machine.
 
-STEP 1: DATABASE SETUP (XAMPP)
+STEP 1: DATABASE SETUP (XAMPP/MySQL)
 ---------------------------------------------------------------------------
-1. Download & Install XAMPP:
+1. Install & Open XAMPP:
    - Go to: https://www.apachefriends.org/download.html
-   - Download the version for your OS (Windows or Mac).
-2. Start the Services:
+   - Download & Install XAMPP for Windows/Mac.
+2. Start Services:
    - Open XAMPP Control Panel.
-   - Click "Start" for both Apache and MySQL.
+   - Click "Start" for BOTH Apache and MySQL.
 3. Create the Database:
    - Open your browser and go to: http://localhost/phpmyadmin/
    - Click "New" on the left sidebar.
    - Database name: library_db
    - Click "Create".
-4. Import the SQL Script:
-   - Click on your new "library_db" on the left.
-   - Click the "SQL" tab at the top.
-   - Open "Library Management System.txt" from the project folder.
-   - Copy ALL the text inside and paste it into the SQL box in phpMyAdmin.
-   - Click "Go" at the bottom right.
+4. Initialize the Schema:
+   - Select "library_db" on the left.
+   - Click the "SQL" tab.
+   - Copy ALL the content from "Library Management System.txt" into the SQL box.
+   - Click "Go".
+5. ADD THE COMPLETION STATUS COLUMN:
+   - In the same SQL box, run this one extra line:
+     ALTER TABLE Issue ADD COLUMN Status VARCHAR(20) DEFAULT 'Active';
 
 STEP 2: PYTHON & VIRTUAL ENVIRONMENT SETUP
 ---------------------------------------------------------------------------
-1. Open your Terminal (Mac) or PowerShell (Windows).
-2. Navigate to the project folder:
-   - Windows: cd C:\Path\To\TaajProject
-   - Mac: cd /Users/YourName/Desktop/TaajProject
-3. Create a clean Virtual Environment:
+1. Open your terminal (PowerShell for Windows, Terminal for Mac).
+2. Navigate to your project folder:
+   - Windows: cd C:\Path\To\Library-MS
+   - Mac: cd /Users/YourName/Desktop/Library-MS
+3. Create a Virtual Environment:
    - Command: python -m venv venv
-4. Activate the environment:
+4. Activate the Environment:
    - Windows: venv\Scripts\activate
    - Mac: source venv/bin/activate
-   * (You should see "(venv)" appear at the start of your terminal line)
+   * (You should now see "(venv)" at the start of your terminal line)
 
 STEP 3: INSTALL DEPENDENCIES
 ---------------------------------------------------------------------------
-Once your environment is active (venv), run this command:
+While the environment (venv) is active, run:
    pip install django mysql-connector-python
 
-STEP 4: RUN THE PROJECT
+STEP 4: INITIALIZE THE AUTHENTICATION SYSTEM
 ---------------------------------------------------------------------------
-1. Prepare the Django system:
+1. Create the Django internal tables:
    python manage.py migrate
-2. Start the server:
+2. Create the FIRST Administrator (Superuser):
+   python manage.py createsuperuser
+   * (Follow the prompts to enter a username, email, and password)
+
+STEP 5: RUN THE PROJECT
+---------------------------------------------------------------------------
+1. Start the server:
    python manage.py runserver 8001
-3. Access the website:
-   - Open your browser and go to: http://127.0.0.1:8001/
+2. Access the system:
+   - Go to: http://127.0.0.1:8001/
+   - LOG IN with the admin account you just created.
 
 ===========================================================================
-    PROJECT FEATURES & TIPS
+    PROJECT FEATURES & ROLES
 ===========================================================================
-- Sidebar: Use the left menu to switch between Books, Members, Staff, etc.
-- Details: Click the "Eye" icon in any table to see deep database info.
-- Dark Mode: Click the Moon icon in the top header to toggle Dark Mode.
-- Team: See the "The Falcons" credits at the bottom of the page.
+- LOGIN/SIGNUP: Secure access for all users.
+- ADMINISTRATOR: Full system access (Books, Members, Issues, Staff).
+- STAFF: Can manage books, members, and issue/return books.
+- STUDENT/MEMBER: Personalized dashboard to see their borrowed history and status.
+- STATUS TRACKING: Staff can mark issues as "Completed" to return books to stock.
+- THEME: Toggle Dark/Light mode via the Moon/Sun icon in the header.
 
 TROUBLESHOOTING:
-- "Unknown database": Make sure you created 'library_db' in phpMyAdmin.
-- "Port in use": If 8001 doesn't work, try python manage.py runserver 8002.
+- MySQL Error: Ensure XAMPP MySQL service is running.
+- Port in Use: Try `python manage.py runserver 8002` if 8001 is busy.
+- Missing Status: Make sure you ran the ALTER TABLE command in Step 1.5.
 ===========================================================================
