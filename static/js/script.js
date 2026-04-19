@@ -9,8 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
-            e.preventDefault();
             const target = item.getAttribute('data-target');
+            if (!target) return; // Allow normal link behavior for logout
+            
+            e.preventDefault();
             navItems.forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
             sections.forEach(section => {
@@ -90,7 +92,17 @@ async function populateAllDropdowns() {
         }
 
         const dateInput = document.getElementById('issue-date-input');
-        if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+        if (dateInput) {
+            const today = new Date();
+            dateInput.value = today.toISOString().split('T')[0];
+            
+            const returnInput = document.getElementById('return-date-input');
+            if (returnInput) {
+                const returnDate = new Date();
+                returnDate.setDate(today.getDate() + 14);
+                returnInput.value = returnDate.toISOString().split('T')[0];
+            }
+        }
     } catch (e) {
         console.error("Dropdown refresh failed", e);
     }
@@ -136,12 +148,58 @@ function setupForm(formId, modalId, url, callback) {
 async function loadSectionData(section) {
     /** Route section requests to specific data loader functions. */
     switch (section) {
-        case 'dashboard': await updateDashboardStats(); await loadRecentIssues(); break;
+        case 'dashboard': 
+            const statsGrid = document.querySelector('.stats-grid');
+            const isStudent = document.getElementById('my-books-count') !== null;
+            if (isStudent) {
+                await loadMyIssues();
+            } else {
+                await updateDashboardStats(); 
+                await loadRecentIssues(); 
+            }
+            break;
+        case 'my-account': await loadMyIssues(); break;
         case 'books': await loadAllBooks(); break;
         case 'members': await loadAllMembers(); break;
         case 'issues': await loadAllIssues(); break;
         case 'staff': await loadAllStaff(); break;
         case 'ratings': await loadAllRatings(); break;
+    }
+}
+
+async function loadMyIssues() {
+    /** Fetch and render the borrowing history for the logged-in member. */
+    try {
+        const response = await fetch('/api/my-issues/');
+        const issues = await response.json();
+        
+        // Update Stats if on dashboard
+        const countEl = document.getElementById('my-books-count');
+        if (countEl) countEl.textContent = issues.length;
+        const activeEl = document.getElementById('active-loans-count');
+        if (activeEl) activeEl.textContent = issues.filter(i => !i.ReturnDate).length;
+
+        // Populate Summary Table (Dashboard)
+        const summaryTbody = document.querySelector('#my-issues-summary-table tbody');
+        if (summaryTbody) {
+            summaryTbody.innerHTML = '';
+            issues.slice(0, 5).forEach(issue => {
+                const statusBadge = `<span class="status-badge ${issue.Status === 'Completed' ? 'status-paid' : 'status-pending'}">${issue.Status || 'Active'}</span>`;
+                summaryTbody.innerHTML += `<tr><td>${issue.BookTitle}</td><td>${issue.IssueDate}</td><td>${issue.ReturnDate || 'Not Returned'}</td><td>${statusBadge}</td></tr>`;
+            });
+        }
+
+        // Populate Full Table (My Account)
+        const fullTbody = document.querySelector('#my-full-issues-table tbody');
+        if (fullTbody) {
+            fullTbody.innerHTML = '';
+            issues.forEach(i => {
+                const statusBadge = `<span class="status-badge ${i.Status === 'Completed' ? 'status-paid' : 'status-pending'}">${i.Status || 'Active'}</span>`;
+                fullTbody.innerHTML += `<tr><td>#${i.IssueID}</td><td>${i.BookTitle}</td><td>${i.AuthorName}</td><td>${i.StaffName}</td><td>${i.IssueDate}</td><td>${i.ReturnDate || 'Pending'}</td><td>${statusBadge}</td></tr>`;
+            });
+        }
+    } catch (e) {
+        console.error("Failed to load personal issues", e);
     }
 }
 
@@ -225,17 +283,33 @@ async function loadAllIssues() {
     tbody.innerHTML = '';
     currentData.issues.forEach(i => {
         const tr = document.createElement('tr');
+        const isCompleted = i.Status === 'Completed';
         tr.innerHTML = `
             <td>#${i.IssueID}</td>
             <td>${i.MemberName}</td>
             <td>${i.IssueDate}</td>
+            <td><span class="status-badge ${isCompleted ? 'status-paid' : 'status-pending'}">${i.Status || 'Active'}</span></td>
             <td>
                 <button class="btn btn-outline btn-sm" onclick="viewDetails('issues', ${i.IssueID})"><i class="fas fa-eye"></i> Details</button>
+                ${!isCompleted ? `<button class="btn btn-primary btn-sm" onclick="completeIssue(${i.IssueID})"><i class="fas fa-check"></i> Complete</button>` : ''}
                 <button class="btn btn-danger btn-sm" onclick="deleteItem('/api/issues/delete/${i.IssueID}/', loadAllIssues)"><i class="fas fa-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+async function completeIssue(id) {
+    /** Handle marking an issue as completed with stock update. */
+    if (confirm('Mark this issue as returned/completed?')) {
+        const response = await fetch(`/api/issues/complete/${id}/`, { method: 'POST' });
+        if (response.ok) {
+            loadAllIssues();
+            updateDashboardStats();
+        } else {
+            alert('Failed to complete issue');
+        }
+    }
 }
 
 async function loadAllStaff() {

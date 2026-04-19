@@ -21,6 +21,14 @@
             <a href="#" class="nav-item active" data-target="dashboard">
                 <i class="fas fa-chart-line"></i> Dashboard
             </a>
+            
+            {% if not user.is_staff and not user.is_superuser %}
+            <a href="#" class="nav-item" data-target="my-account">
+                <i class="fas fa-user-circle"></i> My Account
+            </a>
+            {% endif %}
+
+            {% if user.is_staff or user.is_superuser %}
             <a href="#" class="nav-item" data-target="books">
                 <i class="fas fa-book"></i> Books
             </a>
@@ -30,14 +38,23 @@
             <a href="#" class="nav-item" data-target="issues">
                 <i class="fas fa-clipboard-list"></i> Issues
             </a>
+            {% endif %}
+
+            {% if user.is_superuser %}
             <a href="#" class="nav-item" data-target="staff">
                 <i class="fas fa-user-tie"></i> Staff
             </a>
+            {% endif %}
+            
+            {% if user.is_staff or user.is_superuser %}
             <a href="#" class="nav-item" data-target="ratings">
                 <i class="fas fa-star"></i> Ratings
             </a>
+            {% endif %}
 
-            
+            <a href="/logout/" class="nav-item logout-link" style="margin-top: auto; color: #d9534f;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
         </nav>
     </div>
 
@@ -49,14 +66,23 @@
                 </button>
             </div>
             <div class="user-profile">
-                <span>Admin User</span>
-                <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Profile">
+                <div class="user-info">
+                    <span class="username">{{ user.username|title }}</span>
+                    <small class="role">
+                        {% if user.is_superuser %}Administrator
+                        {% elif user.is_staff %}Staff Member
+                        {% else %}Library Member{% endif %}
+                    </small>
+                </div>
+                <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=random" alt="Profile">
             </div>
         </header>
 
         <!-- DASHBOARD -->
         <section id="dashboard" class="page-section active">
-            <h1 class="page-title">Dashboard Overview</h1>
+            <h1 class="page-title">Welcome, {{ user.username|title }}!</h1>
+            
+            {% if user.is_staff or user.is_superuser %}
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon books"><i class="fas fa-book"></i></div>
@@ -77,10 +103,50 @@
             </div>
 
             <div class="recent-activity card">
-                <div class="card-header"><h2>Recent Issues</h2></div>
+                <div class="card-header"><h2>System Activity</h2></div>
                 <div class="table-container">
                     <table id="recent-issues-table">
                         <thead><tr><th>Issue ID</th><th>Member</th><th>Issue Date</th><th>Return Date</th><th>Status</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon books"><i class="fas fa-book-open"></i></div>
+                    <div class="stat-info"><h3>My Borrowed Books</h3><p id="my-books-count">--</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rating"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info"><h3>Active Loans</h3><p id="active-loans-count">--</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon issues"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="stat-info"><h3>Overdue Fines</h3><p>$0.00</p></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2>My Recent Issues</h2></div>
+                <div class="table-container">
+                    <table id="my-issues-summary-table">
+                        <thead><tr><th>Book Title</th><th>Issue Date</th><th>Return Date</th><th>Status</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- MY ACCOUNT (FOR MEMBERS) -->
+        <section id="my-account" class="page-section">
+            <h1 class="page-title">Personal Library Record</h1>
+            <div class="card">
+                <div class="card-header"><h2>Full Borrowing History</h2></div>
+                <div class="table-container">
+                    <table id="my-full-issues-table">
+                        <thead><tr><th>Issue ID</th><th>Book Title</th><th>Author</th><th>Issued By</th><th>Issue Date</th><th>Due Date</th><th>Status</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -128,7 +194,7 @@
             <div class="card">
                 <div class="table-container">
                     <table id="all-issues-table">
-                        <thead><tr><th>Issue ID</th><th>Member</th><th>Issue Date</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Issue ID</th><th>Member</th><th>Issue Date</th><th>Status</th><th>Action</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -199,7 +265,7 @@
                     <div class="form-group"><label>Select Member</label><select name="MemberID" id="member-dropdown" required></select></div>
                     <div class="form-group"><label>Handling Staff</label><select name="StaffID" id="staff-dropdown" required></select></div>
                     <div class="form-group"><label>Issue Date</label><input type="date" name="IssueDate" id="issue-date-input" required></div>
-                    <div class="form-group"><label>Return Date</label><input type="date" name="ReturnDate"></div>
+                    <div class="form-group"><label>Return Date</label><input type="date" name="ReturnDate" id="return-date-input" required></div>
                     <button type="submit" class="btn btn-primary w-100">Issue Book</button>
                 </form>
             </div>

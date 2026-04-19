@@ -104,6 +104,25 @@ def get_all_categories():
         columns = [col[0] for col in cursor.description]
         return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
+def get_member_issues(email):
+    #Fetch all book issues for a specific member based on their account email.
+    query = """
+        SELECT i.*, b.Title as BookTitle, a.AuthorName, s.StaffName
+        FROM Issue i
+        JOIN Member m ON i.MemberID = m.MemberID
+        JOIN HasBook hb ON i.IssueID = hb.IssueID
+        JOIN Book b ON hb.BookID = b.BookID
+        LEFT JOIN Writes w ON b.BookID = w.BookID
+        LEFT JOIN Author a ON w.AuthorID = a.AuthorID
+        JOIN Staff s ON i.StaffID = s.StaffID
+        WHERE m.Email = %s
+        ORDER BY i.IssueDate DESC
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query, [email])
+        columns = [col[0] for col in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
 def add_book_to_db(data):
     #Insert a new book record and link associated author and category.
     with connection.cursor() as cursor:
@@ -137,10 +156,26 @@ def add_issue_to_db(data):
     with connection.cursor() as cursor:
         cursor.execute("SELECT IFNULL(MAX(IssueID), 0) + 1 FROM Issue")
         new_id = cursor.fetchone()[0]
-        cursor.execute("INSERT INTO Issue (IssueID, MemberID, StaffID, IssueDate, ReturnDate, FineAmount, FineStatus) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                       [new_id, data['MemberID'], data['StaffID'], data['IssueDate'], data['ReturnDate'], 0, 'No'])
+        # Insert issue with Status 'Active'
+        cursor.execute("INSERT INTO Issue (IssueID, MemberID, StaffID, IssueDate, ReturnDate, FineAmount, FineStatus, Status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                       [new_id, data['MemberID'], data['StaffID'], data['IssueDate'], data['ReturnDate'], 0, 'No', 'Active'])
         if data.get('BookID'):
             cursor.execute("INSERT INTO HasBook (IssueID, BookID) VALUES (%s, %s)", [new_id, data['BookID']])
+            # Decrement book copy count
+            cursor.execute("UPDATE Book SET AvailableCopies = AvailableCopies - 1 WHERE BookID = %s", [data['BookID']])
+
+def complete_issue_in_db(issue_id):
+    #Mark an issue as 'Completed' and increment the available copies of the book.
+    with connection.cursor() as cursor:
+        # Get BookID for this issue
+        cursor.execute("SELECT BookID FROM HasBook WHERE IssueID = %s", [issue_id])
+        row = cursor.fetchone()
+        if row:
+            book_id = row[0]
+            # Increment book copy count
+            cursor.execute("UPDATE Book SET AvailableCopies = AvailableCopies + 1 WHERE BookID = %s", [book_id])
+        # Update issue status
+        cursor.execute("UPDATE Issue SET Status = 'Completed' WHERE IssueID = %s", [issue_id])
 
 def add_staff_to_db(data):
     """Insert a new staff member record."""
